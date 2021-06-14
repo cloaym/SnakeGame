@@ -1,0 +1,10 @@
+html {
+	font-family: "Comic Sans", "Comic Sans MS", cursive;
+}
+h1 {
+	color: purple;
+}
+canvas {
+	width: 500px;
+	border: 1px solid black;
+}
