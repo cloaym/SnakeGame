@@ -9,7 +9,8 @@ window.onload = function(){
   board.height = (nTilesY * tileSize())
   var snake = {x:getRandomInt(board.width), y:getRandomInt(board.height), dir:"right"} // xy wrt canvas origin
   var prevTime = performance.now() // ms since window loaded.
-  console.log("Prev: " + prevTime)
+
+  document.addEventListener("keydown", changeDirection)
 
   window.requestAnimationFrame(updateBoard)
   function updateBoard(timeStamp){
@@ -21,15 +22,46 @@ window.onload = function(){
     }
   }
 
+  function changeDirection(event) {
+    const key = event.code
+    switch (key) {
+      case "ArrowUp" :
+        snake.dir = "up"
+        break;
+      case "ArrowDown" :
+        snake.dir = "down"
+        break;
+      case "ArrowRight" :
+        snake.dir = "right"
+        break;
+      case "ArrowLeft" :
+        snake.dir = "left"
+        break;
+    }
+  }
+
   function moveSnake(timeStamp){
     console.log("Prev: " + prevTime)
     console.log("Time: " + timeStamp)
     if (timeStamp - prevTime > 500) {
       contextFor2D.clearRect(0, 0, board.width, board.height)
-      if (snake.dir === "right") {
-        snake.x = snake.x + tileSize()
-        console.log("update position")
+      switch (snake.dir) {
+        case "up" :
+          snake.y = snake.y - tileSize()
+          break;
+        case "down" :
+          snake.y = snake.y + tileSize()
+          break;
+        case "right" :
+          snake.x = snake.x + tileSize()
+          break;
+        case "left" :
+          snake.x = snake.x - tileSize()
+          break;
+
       }
+      console.log("update position")
+
       contextFor2D.beginPath()
       contextFor2D.arc(snake.x, snake.y, (tileSize() / 2) - 1, 0, 2 * Math.PI)
       contextFor2D.stroke()
