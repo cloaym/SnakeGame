@@ -90,7 +90,7 @@ window.onload = function(){
   	scoreElement.innerText = ++score
   }
 
-  function tileSize() { // must be even
+  function tileSize() { // must be even because we divide by two to center things
     return 20
   }
 
@@ -101,8 +101,8 @@ window.onload = function(){
   function getRandomPosition() {
   	// xy in pixels wrt canvas origin (top left)
     var pos = {
-      x : getRandomInt(nTilesX - 1) * tileSize() - (tileSize() / 2),
-      y : getRandomInt(nTilesY - 1) * tileSize() - (tileSize() / 2)
+      x : getRandomInt(nTilesX - 1) * tileSize() + (tileSize() / 2),
+      y : getRandomInt(nTilesY - 1) * tileSize() + (tileSize() / 2)
     }
     console.log("New circle at x=" + pos.x + ", y=" + pos.y)
     return pos
