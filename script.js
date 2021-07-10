@@ -1,23 +1,17 @@
 window.onload = function(){
-  const nTilesX = 20;
-  const nTilesY = 15;
-  const speed = 300; // time in ms to move 1 tile
+  const nTilesX = 20
+  const nTilesY = 15
+  const speed = 300 // time in ms to move 1 tile
 
   var board = document.getElementById("board")
+  var scoreElement = document.getElementById("score")
+  var score = 0
   var contextFor2D = board.getContext("2d")
   board.width = nTilesX * tileSize()
   board.height = nTilesY * tileSize()
-  var snakePos = getRandomPosition(tileSize(), nTilesX, nTilesY)
-  var snake = {
-    x : snakePos.x, // xy of snake center wrt canvas origin (top left)
-    y : snakePos.y,
-    dir : "right"
-  }
-  var targetPos = getRandomPosition(tileSize(), nTilesX, nTilesY)
-  var target = {
-    x : targetPos.x,
-    y : targetPos.y
-  }
+  var snake = getRandomPosition()
+  snake.dir = "right"
+  var target = getRandomPosition()
   var prevTime = performance.now() // ms since window loaded.
 
   document.addEventListener("keydown", changeDirection)
@@ -25,14 +19,17 @@ window.onload = function(){
   window.requestAnimationFrame(updateBoard)
   function updateBoard(timeStamp){
     if (timeStamp - prevTime > speed) {
-      contextFor2D.clearRect(0, 0, board.width, board.height)
-      drawSnakeInNextPos()
-      drawTarget()
+      moveSnake()
+      if (checkOverlap(snake, target)) {
+      	increaseScore(scoreElement)
+      	moveTarget()
+      }
+      redraw() // draw everything
       prevTime = timeStamp
     }
     
     if (outOfFrame()) {
-      window.alert("You lost")
+      alert("You lost")
     } else {
       window.requestAnimationFrame(updateBoard)
     }
@@ -56,7 +53,7 @@ window.onload = function(){
     }
   }
 
-  function drawSnakeInNextPos() {
+  function moveSnake() {
     switch (snake.dir) {
         case "up" :
           snake.y = snake.y - tileSize()
@@ -72,26 +69,42 @@ window.onload = function(){
           break
     }
     console.log("update position")
-    drawCircle(snake.x, snake.y, tileSize() / 2 - 1)
   }
 
-  function drawTarget() {
+  function moveTarget() {
+  	target = getRandomPosition()
+  }
+
+  function redraw() {
+  	contextFor2D.clearRect(0, 0, board.width, board.height)
+  	drawCircle(snake.x, snake.y, tileSize() / 2 - 1)
     drawCircle(target.x, target.y, tileSize() / 2 - 3)
   }
 
+  // return true if snake overlaps target
+  function checkOverlap(snake, target) {
+  	return (snake.x == target.x) && (snake.y == target.y)
+  }
+
+  function increaseScore(scoreElement) {
+  	scoreElement.innerText = ++score
+  }
+
   function tileSize() { // must be even
-    return 20;
+    return 20
   }
 
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
   }
 
-  function getRandomPosition(tileSize, nTilesX, nTilesY) {
+  function getRandomPosition() {
+  	// xy in pixels wrt canvas origin (top left)
     var pos = {
-      x : getRandomInt(nTilesX - 1) * tileSize - (tileSize / 2),
-      y : getRandomInt(nTilesY - 1) * tileSize - (tileSize / 2)
+      x : getRandomInt(nTilesX - 1) * tileSize() - (tileSize() / 2),
+      y : getRandomInt(nTilesY - 1) * tileSize() - (tileSize() / 2)
     }
+    console.log("New circle at x=" + pos.x + ", y=" + pos.y)
     return pos
   }
 
