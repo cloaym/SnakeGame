@@ -18,11 +18,15 @@ window.onload = function(){
   window.requestAnimationFrame(updateBoard)
   function updateBoard(timeStamp){
     if (timeStamp - prevTime > speed) {
-      moveSnake()
-      if (checkOverlap(snake, target)) {
+      var nextPosition = snake.getNextPosition(tileSize())
+      if (checkOverlapWithTarget(nextPosition, target)) {
       	increaseScore(scoreElement)
       	moveTarget()
+      	growOrMoveSnake(nextPosition, true)
+      } else {
+      	growOrMoveSnake(nextPosition, false)
       }
+      // if overlap w snake, lose MAYBE
       redraw() // draw everything
       prevTime = timeStamp
     }
@@ -52,37 +56,29 @@ window.onload = function(){
     }
   }
 
-  function moveSnake() {
-    switch (snake.dir) {
-        case "up" :
-          snake.getHead().y = snake.getHead().y - tileSize()
-          break
-        case "down" :
-          snake.getHead().y = snake.getHead().y + tileSize()
-          break
-        case "right" :
-          snake.getHead().x = snake.getHead().x + tileSize()
-          break
-        case "left" :
-          snake.getHead().x = snake.getHead().x - tileSize()
-          break
+  function growOrMoveSnake(nextPosition, ateTarget) {
+    if (ateTarget) {
+    	snake.addToFront(nextPosition)
+    } else {
+    	snake.moveBackToFront(nextPosition)
     }
-    console.log("update position")
   }
 
   function moveTarget() {
   	target = getRandomPosition()
   }
 
-  function redraw() {
+  function redraw() { //FIXME
   	contextFor2D.clearRect(0, 0, board.width, board.height)
-  	drawCircle(snake.getHead().x, snake.getHead().y, tileSize() / 2 - 1)
+  	snake.getSegments().forEach(segment => {
+  		drawCircle(segment.x, segment.y, tileSize() / 2 - 1)
+  	})
     drawCircle(target.x, target.y, tileSize() / 2 - 3)
   }
 
   // return true if snake overlaps target
-  function checkOverlap(snake, target) {
-  	return (snake.getHead().x == target.x) && (snake.getHead().y == target.y)
+  function checkOverlapWithTarget(nextSnakeHead, target) {
+  	return (nextSnakeHead.x == target.x) && (nextSnakeHead.y == target.y)
   }
 
   function increaseScore(scoreElement) {
@@ -103,7 +99,6 @@ window.onload = function(){
       x : getRandomInt(nTilesX - 1) * tileSize() + (tileSize() / 2),
       y : getRandomInt(nTilesY - 1) * tileSize() + (tileSize() / 2)
     }
-    console.log("New circle at x=" + pos.x + ", y=" + pos.y)
     return pos
   }
 
@@ -125,8 +120,44 @@ function Snake(pos) {
 	this.segments = []
 	this.dir = "right"
 	this.segments.push(pos)
+	return this
 }
 
 Snake.prototype.getHead = function() {
 	return this.segments[0]
+}
+
+Snake.prototype.getSegments = function() {
+	return this.segments
+}
+
+Snake.prototype.getNextPosition = function(tileSize) {
+	var nextPos = {
+		x : this.getHead().x,
+		y : this.getHead().y
+	}
+	switch (this.dir) {
+        case "up" :
+        	nextPos.y -= tileSize
+        	break
+        case "down" :
+        	nextPos.y += tileSize
+	        break
+        case "right" :
+        	nextPos.x += tileSize
+	        break
+        case "left" :
+        	nextPos.x -= tileSize
+	    	break
+    }
+    return nextPos
+}
+
+Snake.prototype.addToFront = function(nextPos) {
+	this.segments.unshift(nextPos)
+}
+
+Snake.prototype.moveBackToFront = function(nextPos) {
+	this.segments.pop()
+	this.segments.unshift(nextPos)
 }
