@@ -9,8 +9,7 @@ window.onload = function(){
   var contextFor2D = board.getContext("2d")
   board.width = nTilesX * tileSize()
   board.height = nTilesY * tileSize()
-  var snake = getRandomPosition()
-  snake.dir = "right"
+  var snake = new Snake(getRandomPosition())
   var target = getRandomPosition()
   var prevTime = performance.now() // ms since window loaded.
 
@@ -56,16 +55,16 @@ window.onload = function(){
   function moveSnake() {
     switch (snake.dir) {
         case "up" :
-          snake.y = snake.y - tileSize()
+          snake.getHead().y = snake.getHead().y - tileSize()
           break
         case "down" :
-          snake.y = snake.y + tileSize()
+          snake.getHead().y = snake.getHead().y + tileSize()
           break
         case "right" :
-          snake.x = snake.x + tileSize()
+          snake.getHead().x = snake.getHead().x + tileSize()
           break
         case "left" :
-          snake.x = snake.x - tileSize()
+          snake.getHead().x = snake.getHead().x - tileSize()
           break
     }
     console.log("update position")
@@ -77,18 +76,18 @@ window.onload = function(){
 
   function redraw() {
   	contextFor2D.clearRect(0, 0, board.width, board.height)
-  	drawCircle(snake.x, snake.y, tileSize() / 2 - 1)
+  	drawCircle(snake.getHead().x, snake.getHead().y, tileSize() / 2 - 1)
     drawCircle(target.x, target.y, tileSize() / 2 - 3)
   }
 
   // return true if snake overlaps target
   function checkOverlap(snake, target) {
-  	return (snake.x == target.x) && (snake.y == target.y)
+  	return (snake.getHead().x == target.x) && (snake.getHead().y == target.y)
   }
 
   function increaseScore(scoreElement) {
   	scoreElement.innerText = ++score
-  }
+  } 
 
   function tileSize() { // must be even because we divide by two to center things
     return 20
@@ -109,10 +108,10 @@ window.onload = function(){
   }
 
   function outOfFrame() {
-    return snake.x + tileSize() / 2 > board.width ||
-    snake.x < 0 ||
-    snake.y + tileSize() / 2 > board.height ||
-    snake.y < 0
+    return snake.getHead().x + tileSize() / 2 > board.width ||
+    snake.getHead().x < 0 ||
+    snake.getHead().y + tileSize() / 2 > board.height ||
+    snake.getHead().y < 0
   }
 
   function drawCircle(x, y, radius) {
@@ -120,4 +119,14 @@ window.onload = function(){
     contextFor2D.arc(x, y, radius, 0, 2 * Math.PI)
     contextFor2D.stroke()
   }
-};
+}
+
+function Snake(pos) {
+	this.segments = []
+	this.dir = "right"
+	this.segments.push(pos)
+}
+
+Snake.prototype.getHead = function() {
+	return this.segments[0]
+}
