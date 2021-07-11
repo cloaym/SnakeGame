@@ -26,16 +26,17 @@ window.onload = function(){
       } else {
       	growOrMoveSnake(nextPosition, false)
       }
-      // if overlap w snake, lose MAYBE
+	  
+	  if (snake.checkOverlapWithSelf() || outOfFrame()) {
+		alert("You lost")
+		return
+	  }
+
       redraw() // draw everything
       prevTime = timeStamp
     }
     
-    if (outOfFrame()) {
-      alert("You lost")
-    } else {
-      window.requestAnimationFrame(updateBoard)
-    }
+    window.requestAnimationFrame(updateBoard)
   }
 
   function changeDirection(event) {
@@ -161,3 +162,12 @@ Snake.prototype.moveBackToFront = function(nextPos) {
 	this.segments.pop()
 	this.segments.unshift(nextPos)
 }
+
+Snake.prototype.checkOverlapWithSelf = function() {
+	for (var i = 1; i < this.segments.length; i++) {
+		if ((this.getHead().x == this.segments[i].x) && (this.getHead().y == this.segments[i].y)) {
+  			return true
+  		}
+	}
+  	return false
+  }
