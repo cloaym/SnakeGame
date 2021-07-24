@@ -1,20 +1,17 @@
 window.onload = function () {
-  const speed = 300 // time in ms to move 1 tile
-
   var board = document.getElementById("board")
   var scoreElement = document.getElementById("score")
-  var score = 0
   var contextFor2D = board.getContext("2d")
-
+  var gameState
+  var speed
+  var score
+  var snake
+  var target
   var nTilesX
   var nTilesY
   var tileWidth
-  setUpBoardSizes()
-  board.width = nTilesX * tileSize()
-  board.height = nTilesY * tileSize()
-
-  var snake = new Snake(getRandomPosition())
-  var target = getRandomPosition()
+  initGame()
+  
   var prevTime = performance.now() // ms since window loaded.
 
   document.addEventListener("keydown", handleKeyInput)
@@ -23,6 +20,9 @@ window.onload = function () {
   var xDown = null
   var yDown = null
 
+  var button = document.getElementById("button")
+  button.addEventListener("click", buttonHandler)
+  
   function setUpBoardSizes() {
     // set nTilesX, nTilesY, tileSize based on window size
     const xDim = window.innerWidth * 0.9
@@ -51,9 +51,33 @@ window.onload = function () {
     }
   }
 
-  window.requestAnimationFrame(updateBoard)
+  function buttonHandler() {
+    switch (gameState) {
+      case gameStates.LOADED :
+        gameState = gameStates.PLAYING
+        button.textContent = "Pause"
+        window.requestAnimationFrame(updateBoard)
+        break
+      case gameStates.PLAYING :
+        gameState = gameStates.PAUSED
+        button.textContent = "Resume"
+        break
+      case gameStates.PAUSED :
+        gameState = gameStates.PLAYING
+        button.textContent = "Pause"
+        window.requestAnimationFrame(updateBoard)
+        break
+      case gameStates.FINISHED :
+        gameState = gameStates.PLAYING
+        button.textContent = "Paused"
+        window.requestAnimationFrame(updateBoard)
+        break
+    }    
+  }
+
   function updateBoard(timeStamp) {
-    if (timeStamp - prevTime > speed) {
+    // consider not wasting CPU cycles
+    if (gameState == gameStates.PLAYING && timeStamp - prevTime > speed) {
       var nextPosition = snake.getNextPosition(tileSize())
       if (checkOverlapWithTarget(nextPosition, target)) {
         increaseScore(scoreElement)
@@ -64,7 +88,10 @@ window.onload = function () {
       }
 
       if (snake.checkOverlapWithSelf() || outOfFrame()) {
+        gameState = gameStates.FINISHED
+        button.textContent = "New Game"
         alert("You lost")
+        initGame()
         return
       }
 
@@ -75,28 +102,48 @@ window.onload = function () {
     window.requestAnimationFrame(updateBoard)
   }
 
+  function initGame() {
+    speed = 300 // time in ms to move 1 tile
+    score = 0
+    scoreElement.innerText = 0
+    setUpBoardSizes()
+    board.width = nTilesX * tileSize()
+    board.height = nTilesY * tileSize()
+    snake = new Snake(getRandomPosition())
+    target = getRandomPosition()
+    gameState = gameStates.LOADED
+  }
+
   function handleKeyInput(event) {
     const key = event.code
     switch (key) {
       case "ArrowUp":
+      case "KeyW":
         changeDirection("up")
         break
       case "ArrowDown":
+      case "KeyS":
         changeDirection("down")
         break
       case "ArrowRight":
+      case "KeyD":
         changeDirection("right")
         break
       case "ArrowLeft":
+      case "KeyA":
         changeDirection("left")
+        break
+      case "Space":
+      case "KeyP":
+        buttonHandler()
         break
     }
   }
 
   function handleTouchStart(event) {
-    const firstTouch = event.touches[0];
-    xDown = firstTouch.clientX;
-    yDown = firstTouch.clientY;
+    const firstTouch = event.touches[0]
+    xDown = firstTouch.clientX
+    yDown = firstTouch.clientY
   };
 
   /**
@@ -153,7 +200,7 @@ window.onload = function () {
     target = getRandomPosition()
   }
 
-  function redraw() { //FIXME
+  function redraw() {
     contextFor2D.clearRect(0, 0, board.width, board.height)
     snake.getSegments().forEach(segment => {
       drawCircle(segment.x, segment.y, tileSize() / 2 - 1)
@@ -199,6 +246,13 @@ window.onload = function () {
     contextFor2D.arc(x, y, radius, 0, 2 * Math.PI)
     contextFor2D.stroke()
   }
+}
+
+const gameStates = {
+  LOADED : "loaded", // hasn't started
+  PLAYING : "playing",
+  PAUSED : "paused",
+  FINISHED : "finished" // lost
 }
 
 function Snake(pos) {

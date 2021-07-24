@@ -14,3 +14,10 @@ canvas {
 	margin-left: auto;
 	margin-right: auto;
 }
+button {
+	display: block;
+	width: 10%;
+    margin-left: auto;
+    margin-right: auto;
+	margin-bottom: 15px;
+}
