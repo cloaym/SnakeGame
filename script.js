@@ -52,7 +52,8 @@ window.onload = function () {
     }
   }
 
-  function buttonHandler() {
+  function buttonHandler(event) {
+    event.preventDefault() // prevent focusing on button so subsequent space doesn't trigger callback twice (thru key and button)
     switch (gameState) {
       case gameStates.LOADED :
         gameState = gameStates.PLAYING
