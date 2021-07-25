@@ -3,7 +3,8 @@ window.onload = function () {
   var scoreElement = document.getElementById("score")
   var contextFor2D = board.getContext("2d")
   var gameState
-  var speed
+  /** approx time in ms to move snake forward one square/update board */
+  var updateRate
   var score
   var snake
   var target
@@ -22,7 +23,7 @@ window.onload = function () {
 
   var button = document.getElementById("button")
   button.addEventListener("click", buttonHandler)
-  
+
   function setUpBoardSizes() {
     // set nTilesX, nTilesY, tileSize based on window size
     const xDim = window.innerWidth * 0.9
@@ -77,10 +78,11 @@ window.onload = function () {
 
   function updateBoard(timeStamp) {
     // consider not wasting CPU cycles
-    if (gameState == gameStates.PLAYING && timeStamp - prevTime > speed) {
+    if (gameState == gameStates.PLAYING && timeStamp - prevTime > updateRate) {
       var nextPosition = snake.getNextPosition(tileSize())
       if (checkOverlapWithTarget(nextPosition, target)) {
         increaseScore(scoreElement)
+        increaseSpeed()
         moveTarget()
         growOrMoveSnake(nextPosition, true)
       } else {
@@ -103,7 +105,7 @@ window.onload = function () {
   }
 
   function initGame() {
-    speed = 300 // time in ms to move 1 tile
+    updateRate = 300 // time in ms to move 1 tile
     score = 0
     scoreElement.innerText = 0
     setUpBoardSizes()
@@ -215,6 +217,10 @@ window.onload = function () {
 
   function increaseScore(scoreElement) {
     scoreElement.innerText = ++score
+  }
+
+  function increaseSpeed() {
+    updateRate = 0.95 * updateRate
   }
 
   function tileSize() {
