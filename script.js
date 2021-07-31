@@ -11,6 +11,7 @@ window.onload = function () {
   var nTilesX
   var nTilesY
   var tileWidth
+  var directionQueue = []
   initGame()
   
   var prevTime = performance.now() // ms since window loaded.
@@ -80,6 +81,9 @@ window.onload = function () {
   function updateBoard(timeStamp) {
     // consider not wasting CPU cycles
     if (gameState == gameStates.PLAYING && timeStamp - prevTime > updateRate) {
+      if (directionQueue.length != 0) {
+        snake.dir = directionQueue.shift()
+      }
       var nextPosition = snake.getNextPosition(tileSize())
       if (checkOverlapWithTarget(nextPosition, target)) {
         increaseScore(scoreElement)
@@ -122,19 +126,19 @@ window.onload = function () {
     switch (key) {
       case "ArrowUp":
       case "KeyW":
-        changeDirection("up")
+        queueDirection("up")
         break
       case "ArrowDown":
       case "KeyS":
-        changeDirection("down")
+        queueDirection("down")
         break
       case "ArrowRight":
       case "KeyD":
-        changeDirection("right")
+        queueDirection("right")
         break
       case "ArrowLeft":
       case "KeyA":
-        changeDirection("left")
+        queueDirection("left")
         break
       case "Space":
       case "KeyP":
@@ -187,8 +191,8 @@ window.onload = function () {
     yDown = null;
   };
 
-  function changeDirection(direction) {
-    snake.dir = direction
+  function queueDirection(direction) {
+    directionQueue.push(direction)
   }
 
   function growOrMoveSnake(nextPosition, ateTarget) {
@@ -282,6 +286,7 @@ Snake.prototype.getNextPosition = function (tileSize) {
     x: this.getHead().x,
     y: this.getHead().y
   }
+
   switch (this.dir) {
     case "up":
       nextPos.y -= tileSize
