@@ -1,17 +1,20 @@
 window.onload = function () {
   var board = document.getElementById("board")
   var scoreElement = document.getElementById("score")
+  var highScoreElement = document.getElementById("highScore")
   var contextFor2D = board.getContext("2d")
   var gameState
   /** approx time in ms to move snake forward one square/update board */
   var updateRate
   var score
+  var highScore = 0
   var snake
   var target
   var nTilesX
   var nTilesY
   var tileWidth
   var directionQueue = []
+  loadHighScore()
   initGame()
   
   var prevTime = performance.now() // ms since window loaded.
@@ -98,6 +101,11 @@ window.onload = function () {
         gameState = gameStates.FINISHED
         button.textContent = "New Game"
         alert("You lost")
+        if (score > highScore) {
+          highScore = score
+          highScoreElement.innerText = highScore
+          document.cookie = "highScore=" + highScore + "; SameSite=Strict;"
+        }
         initGame()
         return
       }
@@ -107,6 +115,17 @@ window.onload = function () {
     }
 
     window.requestAnimationFrame(updateBoard)
+  }
+  
+  function loadHighScore() {
+    var cookie = document.cookie
+      .split("; ")
+      .find(row=>row.startsWith("highScore="))
+    if (cookie != null) {
+      var storedHighScore = cookie.split('=')[1]
+      highScore = storedHighScore
+      highScoreElement.innerText = highScore
+    }
   }
 
   function initGame() {

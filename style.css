@@ -21,3 +21,14 @@ button {
     margin-right: auto;
 	margin-bottom: 15px;
 }
+.flex-parent {
+	display: flex;
+	flex-flow: row wrap;
+	margin-left: auto;
+	margin-right: auto;
+	width: 20%;
+	justify-content: space-evenly;
+}
+.score-group {
+	flex-basis: 50%;
+}

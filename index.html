@@ -8,6 +8,7 @@
 			Snake game!!!
 		</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta charset="UTF-8">
 		<link rel="shortcut icon" type="image/x-icon" href="favicon.ico"> <!-- 16x16 at root-->
 		<link rel="stylesheet" href="style.css">
 		<script type="text/javascript" src="script.js"></script>
@@ -24,7 +25,15 @@
 			Start
 		</button>
 		<canvas id="board"></canvas>
-		<p>Score: </p> 
-		<p id="score">0</p> 
+		<div class="flex-parent">
+			<div class="score-group">
+				<p>Score: </p> 
+				<p id="score">0</p>
+			</div>
+			<div class="score-group">
+				<p>High Score: </p> 
+				<p id="highScore">0</p>
+			</div>
+		</div>
 	</body>
 </html>
