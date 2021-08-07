@@ -142,25 +142,31 @@ window.onload = function () {
 
   function handleKeyInput(event) {
     const key = event.code
-    switch (key) {
-      case "ArrowUp":
-      case "KeyW":
-        queueDirection("up")
-        break
-      case "ArrowDown":
-      case "KeyS":
-        queueDirection("down")
-        break
-      case "ArrowRight":
-      case "KeyD":
-        queueDirection("right")
-        break
-      case "ArrowLeft":
-      case "KeyA":
-        queueDirection("left")
-        break
+    if (gameState == gameStates.PLAYING) {
+      switch (key) {
+        case "ArrowUp":
+        case "KeyW":
+          handleDirectionChange(event, "up")
+          break
+        case "ArrowDown":
+        case "KeyS":
+          handleDirectionChange(event, "down")
+          break
+        case "ArrowRight":
+        case "KeyD":
+          handleDirectionChange(event, "right")
+          break
+        case "ArrowLeft":
+        case "KeyA":
+          handleDirectionChange(event, "left")
+          break
+      }
+    }
+
+    switch(key) {
       case "Space":
       case "KeyP":
+        event.preventDefault() // stop pagedown
         buttonHandler()
         break
     }
@@ -178,7 +184,7 @@ window.onload = function () {
    * (user "givanse")
    */
   function handleTouchMove(event) {
-    if (!xDown || !yDown) {
+    if (!xDown || !yDown || gameState != gameStates.PLAYING) {
       return;
     }
 
@@ -191,24 +197,29 @@ window.onload = function () {
     if (Math.abs(xDiff) > Math.abs(yDiff)) { // horizontal component larger
       if (xDiff > 0) {
         /* left swipe */
-        changeDirection("left")
+        handleDirectionChange(event, "left")
       } else {
         /* right swipe */
-        changeDirection("right")
+        handleDirectionChange(event, "right")
       }
     } else {
       if (yDiff > 0) {
         /* up swipe */
-        changeDirection("up")
+        handleDirectionChange(event, "up")
       } else {
         /* down swipe */
-        changeDirection("down")
+        handleDirectionChange(event, "down")
       }
     }
     /* reset values */
     xDown = null;
     yDown = null;
   };
+
+  function handleDirectionChange(event, direction) {
+    event.preventDefault() // stop scrolling
+    queueDirection(direction)
+  }
 
   function queueDirection(direction) {
     directionQueue.push(direction)
