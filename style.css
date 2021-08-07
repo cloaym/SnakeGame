@@ -13,10 +13,12 @@ canvas {
 	border: 1px solid black;
 	margin-left: auto;
 	margin-right: auto;
+	/* prevent scrolling during play */
+	touch-action: none;
 }
 button {
 	display: block;
-	width: 10%;
+	min-width: 10%;
     margin-left: auto;
     margin-right: auto;
 	margin-bottom: 15px;
