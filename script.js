@@ -12,6 +12,7 @@ window.onload = function () {
   var target
   var nTilesX
   var nTilesY
+  /** pixels */
   var tileWidth
   var directionQueue = []
   loadHighScore()
@@ -87,7 +88,7 @@ window.onload = function () {
       if (directionQueue.length != 0) {
         snake.dir = directionQueue.shift()
       }
-      var nextPosition = snake.getNextPosition(tileSize())
+      var nextPosition = snake.getNextPosition()
       if (checkOverlapWithTarget(nextPosition, target)) {
         increaseScore(scoreElement)
         increaseSpeed()
@@ -135,7 +136,7 @@ window.onload = function () {
     setUpBoardSizes()
     board.width = nTilesX * tileSize()
     board.height = nTilesY * tileSize()
-    snake = new Snake(getRandomPosition())
+    snake = new Snake({i:0, j:0})
     target = getRandomPosition()
     gameState = gameStates.LOADED
   }
@@ -240,14 +241,14 @@ window.onload = function () {
   function redraw() {
     contextFor2D.clearRect(0, 0, board.width, board.height)
     snake.getSegments().forEach(segment => {
-      drawCircle(segment.x, segment.y, tileSize() / 2 - 1)
+      drawCircle(segment, tileSize() / 2 - 1)
     })
-    drawCircle(target.x, target.y, tileSize() / 2 - 3)
+    drawCircle(target, tileSize() / 2 - 3)
   }
 
   // return true if snake overlaps target
   function checkOverlapWithTarget(nextSnakeHead, target) {
-    return (nextSnakeHead.x == target.x) && (nextSnakeHead.y == target.y)
+    return (nextSnakeHead.i == target.i) && (nextSnakeHead.j == target.j)
   }
 
   function increaseScore(scoreElement) {
@@ -262,29 +263,42 @@ window.onload = function () {
     return tileWidth
   }
 
+  /**
+   * returns int [0, max - 1]
+   */
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
   }
 
   function getRandomPosition() {
-    // xy in pixels wrt canvas origin (top left)
-    var pos = {
-      x: getRandomInt(nTilesX - 1) * tileSize() + (tileSize() / 2),
-      y: getRandomInt(nTilesY - 1) * tileSize() + (tileSize() / 2)
+    // 0-indexed tile pos
+    return {
+      i: getRandomInt(nTilesX),
+      j: getRandomInt(nTilesY)
     }
-    return pos
+  }
+  /**
+   * tilePosition: 0-indexed xy tile index
+   * returns pixel coords of center of that tile
+   */
+  function toPixelCoords(tilePosition) {
+    return {
+      x: (tilePosition.i + 0.5) * tileSize(),
+      y: (tilePosition.j + 0.5) * tileSize()
+    }
   }
 
   function outOfFrame() {
-    return snake.getHead().x + tileSize() / 2 > board.width ||
-      snake.getHead().x < 0 ||
-      snake.getHead().y + tileSize() / 2 > board.height ||
-      snake.getHead().y < 0
+    return snake.getHead().i > nTilesX ||
+      snake.getHead().i < 0 ||
+      snake.getHead().j > nTilesY ||
+      snake.getHead().j < 0
   }
 
-  function drawCircle(x, y, radius) {
+  function drawCircle(tilePos, radius) {
     contextFor2D.beginPath()
-    contextFor2D.arc(x, y, radius, 0, 2 * Math.PI)
+    var coord = toPixelCoords(tilePos)
+    contextFor2D.arc(coord.x, coord.y, radius, 0, 2 * Math.PI)
     contextFor2D.stroke()
   }
 }
@@ -311,24 +325,24 @@ Snake.prototype.getSegments = function () {
   return this.segments
 }
 
-Snake.prototype.getNextPosition = function (tileSize) {
+Snake.prototype.getNextPosition = function () {
   var nextPos = {
-    x: this.getHead().x,
-    y: this.getHead().y
+    i: this.getHead().i,
+    j: this.getHead().j
   }
 
   switch (this.dir) {
     case "up":
-      nextPos.y -= tileSize
+      nextPos.j -= 1
       break
     case "down":
-      nextPos.y += tileSize
+      nextPos.j += 1
       break
     case "right":
-      nextPos.x += tileSize
+      nextPos.i += 1
       break
     case "left":
-      nextPos.x -= tileSize
+      nextPos.i -= 1
       break
   }
   return nextPos
@@ -344,8 +358,8 @@ Snake.prototype.moveBackToFront = function (nextPos) {
 }
 
 Snake.prototype.checkOverlapWithSelf = function () {
-  for (var i = 1; i < this.segments.length; i++) {
-    if ((this.getHead().x == this.segments[i].x) && (this.getHead().y == this.segments[i].y)) {
+  for (var n = 1; n < this.segments.length; n++) {
+    if ((this.getHead().i == this.segments[n].i) && (this.getHead().j == this.segments[n].j)) {
       return true
     }
   }
