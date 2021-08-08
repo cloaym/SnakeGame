@@ -92,7 +92,7 @@ window.onload = function () {
       if (checkOverlapWithTarget(nextPosition, target)) {
         increaseScore(scoreElement)
         increaseSpeed()
-        moveTarget()
+        moveTarget(snake)
         growOrMoveSnake(nextPosition, true)
       } else {
         growOrMoveSnake(nextPosition, false)
@@ -137,7 +137,7 @@ window.onload = function () {
     board.width = nTilesX * tileSize()
     board.height = nTilesY * tileSize()
     snake = new Snake({i:0, j:0})
-    target = getRandomPosition()
+    target = getRandomUnoccupiedPosition(snake)
     gameState = gameStates.LOADED
   }
 
@@ -234,8 +234,8 @@ window.onload = function () {
     }
   }
 
-  function moveTarget() {
-    target = getRandomPosition()
+  function moveTarget(snake) {
+    target = getRandomUnoccupiedPosition(snake)
   }
 
   function redraw() {
@@ -267,15 +267,26 @@ window.onload = function () {
    * returns int [0, max - 1]
    */
   function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
+    return Math.floor(Math.random() * max)
   }
 
-  function getRandomPosition() {
-    // 0-indexed tile pos
-    return {
-      i: getRandomInt(nTilesX),
-      j: getRandomInt(nTilesY)
+  function getRandomUnoccupiedPosition(snake) {
+    var unoccupiedPositions = []
+    for (var col = 0; col < nTilesX; col++) {
+      for (var row = 0; row < nTilesY; row++) {
+        var isOccupied = false
+        for (var segment in snake.segments) {
+          if (col == segment.i && row == segment.j) {
+            isOccupied = true
+            break
+          }
+        }
+        if (!isOccupied) {
+          unoccupiedPositions.push({i: col, j: row})
+        }
+      }
     }
+    return unoccupiedPositions[getRandomInt(unoccupiedPositions.length)]
   }
   /**
    * tilePosition: 0-indexed xy tile index
@@ -289,9 +300,9 @@ window.onload = function () {
   }
 
   function outOfFrame() {
-    return snake.getHead().i > nTilesX ||
+    return snake.getHead().i >= nTilesX ||
       snake.getHead().i < 0 ||
-      snake.getHead().j > nTilesY ||
+      snake.getHead().j >= nTilesY ||
       snake.getHead().j < 0
   }
 
