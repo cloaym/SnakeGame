@@ -262,9 +262,10 @@ window.onload = function () {
   function redraw() {
     contextFor2D.clearRect(0, 0, board.width, board.height)
     snake.getSegments().forEach(segment => {
-      drawCircle(segment, tileSize() / 2 - 1)
+      drawCircle(segment, tileSize() / 2 - 1, "#60842e")
     })
-    drawCircle(target, tileSize() / 2 - 3)
+    drawEyes(snake, tileSize() / 2 - 1)
+    drawCircle(target, tileSize() / 2 - 3, "#a67244")
   }
 
   // return true if snake overlaps target
@@ -327,11 +328,46 @@ window.onload = function () {
       snake.getHead().j < 0
   }
 
-  function drawCircle(tilePos, radius) {
+  function drawCircle(tilePos, radius, fillColor) {
+    drawCircleAt(toPixelCoords(tilePos), radius, fillColor)
+  }
+
+  function drawCircleAt(coord, radius, fillColor) {
     contextFor2D.beginPath()
-    var coord = toPixelCoords(tilePos)
     contextFor2D.arc(coord.x, coord.y, radius, 0, 2 * Math.PI)
+    contextFor2D.fillStyle = fillColor
+    contextFor2D.fill()
     contextFor2D.stroke()
+  }
+
+  function drawEyes(snake, headRadius) {
+    const headCenter = toPixelCoords(snake.getHead())
+    var eyesCoords = getEyeCoordinates(headCenter, headRadius, snake.dir)
+    drawCircleAt(eyesCoords[0], headRadius * 0.1, "black")
+    drawCircleAt(eyesCoords[1], headRadius * 0.1, "black")
+  }
+
+  function getEyeCoordinates(headCenter, headRadius, direction) {
+    var ret = []
+    switch (direction) {
+      case "up" :
+        ret[0] = {x: headCenter.x - headRadius * 0.3, y: headCenter.y - headRadius * 0.3}
+        ret[1] = {x: headCenter.x + headRadius * 0.3, y: headCenter.y - headRadius * 0.3}
+        break
+      case "down" :
+        ret[0] = {x: headCenter.x - headRadius * 0.3, y: headCenter.y + headRadius * 0.3}
+        ret[1] = {x: headCenter.x + headRadius * 0.3, y: headCenter.y + headRadius * 0.3}
+        break
+      case "left" :
+        ret[0] = {x: headCenter.x - headRadius * 0.3, y: headCenter.y - headRadius * 0.3}
+        ret[1] = {x: headCenter.x - headRadius * 0.3, y: headCenter.y + headRadius * 0.3}
+        break
+      case "right" :
+        ret[0] = {x: headCenter.x + headRadius * 0.3, y: headCenter.y - headRadius * 0.3}
+        ret[1] = {x: headCenter.x + headRadius * 0.3, y: headCenter.y + headRadius * 0.3}
+        break
+    }
+    return ret
   }
 }
 
