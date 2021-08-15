@@ -219,7 +219,28 @@ window.onload = function () {
 
   function handleDirectionChange(event, direction) {
     event.preventDefault() // stop scrolling
-    queueDirection(direction)
+    var previousDirection
+    if (directionQueue.length == 0) {
+      previousDirection = snake.dir
+    } else {
+      previousDirection = directionQueue[directionQueue.length - 1]
+    }
+    if (previousDirection != direction && !areOppositeDirections(previousDirection, direction)) {
+      queueDirection(direction)
+    }
+  }
+
+  function areOppositeDirections(direction1, direction2) {
+    switch (direction1) {
+      case "up":
+        return direction2 == "down"
+      case "down":
+        return direction2 == "up"
+      case "right":
+        return direction2 == "left"
+      case "left":
+        return direction2 == "right"
+    }
   }
 
   function queueDirection(direction) {
