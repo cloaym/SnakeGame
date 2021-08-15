@@ -92,8 +92,8 @@ window.onload = function () {
       if (checkOverlapWithTarget(nextPosition, target)) {
         increaseScore(scoreElement)
         increaseSpeed()
-        moveTarget(snake)
         growOrMoveSnake(nextPosition, true)
+        moveTarget(snake)
       } else {
         growOrMoveSnake(nextPosition, false)
       }
@@ -275,8 +275,8 @@ window.onload = function () {
     for (var col = 0; col < nTilesX; col++) {
       for (var row = 0; row < nTilesY; row++) {
         var isOccupied = false
-        for (var segment in snake.segments) {
-          if (col == segment.i && row == segment.j) {
+        for (const segment of snake.getSegments()) {
+          if (col === segment.i && row === segment.j) {
             isOccupied = true
             break
           }
