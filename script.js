@@ -121,12 +121,8 @@ window.onload = function () {
   }
   
   function loadHighScore() {
-    var cookie = document.cookie
-      .split("; ")
-      .find(row=>row.startsWith("highScore="))
-    if (cookie != null) {
-      var storedHighScore = cookie.split('=')[1]
-      highScore = storedHighScore
+    var highScore = getCookie("highScore")
+    if (highScore != null) {
       highScoreElement.innerText = highScore
     }
   }
@@ -147,6 +143,12 @@ window.onload = function () {
     var settingsPanel = document.getElementById("settings")
     if (settingsPanel.classList.contains("hidden")) {
       settingsPanel.classList.remove("hidden")
+      var themes = document.getElementsByName("theme")
+      themes.forEach(theme => {
+        if (theme.value == getCurrentTheme()) {
+          theme.checked = "checked"
+        }
+      })
     } else {
       settingsPanel.classList.add("hidden")
     }
@@ -154,7 +156,8 @@ window.onload = function () {
 
   function changeTheme(event) {
     var theme = event.target.value
-    document.getElementById("themeStyle").href = theme + ".css"
+    changeThemeResource(theme)
+    document.cookie = "theme=" + theme + "; SameSite=Strict;"
   }
 
   function handleKeyInput(event) {
@@ -344,14 +347,15 @@ window.onload = function () {
       snake.getHead().j < 0
   }
 
-  function drawCircle(tilePos, radius, fillColor) {
-    drawCircleAt(toPixelCoords(tilePos), radius, fillColor)
+  function drawCircle(tilePos, radius, color) {
+    drawCircleAt(toPixelCoords(tilePos), radius, color)
   }
 
-  function drawCircleAt(coord, radius, fillColor) {
+  function drawCircleAt(coord, radius, color) {
     contextFor2D.beginPath()
+    contextFor2D.strokeStyle = color;
     contextFor2D.arc(coord.x, coord.y, radius, 0, 2 * Math.PI)
-    contextFor2D.fillStyle = fillColor
+    contextFor2D.fillStyle = color
     contextFor2D.fill()
     contextFor2D.stroke()
   }
