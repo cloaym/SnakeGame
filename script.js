@@ -20,6 +20,8 @@ window.onload = function () {
   
   var prevTime = performance.now() // ms since window loaded.
 
+  document.getElementById("settingsButton").addEventListener("click", toggleSettings)
+  document.getElementsByName("theme").forEach(element => element.addEventListener("change", changeTheme))
   document.addEventListener("keydown", handleKeyInput)
   document.addEventListener("touchstart", handleTouchStart)
   document.addEventListener("touchmove", handleTouchMove)
@@ -139,6 +141,20 @@ window.onload = function () {
     snake = new Snake({i:0, j:0})
     target = getRandomUnoccupiedPosition(snake)
     gameState = gameStates.LOADED
+  }
+
+  function toggleSettings(event) {
+    var settingsPanel = document.getElementById("settings")
+    if (settingsPanel.classList.contains("hidden")) {
+      settingsPanel.classList.remove("hidden")
+    } else {
+      settingsPanel.classList.add("hidden")
+    }
+  }
+
+  function changeTheme(event) {
+    var theme = event.target.value
+    document.getElementById("themeStyle").href = theme + ".css"
   }
 
   function handleKeyInput(event) {
