@@ -1,3 +1,11 @@
+const themes = {
+    // These strings also need to match:
+    // - the names of the linked CSS theme files
+    // - the "value" of the radio buttons for choosing the theme
+    LIGHT : "light_theme",
+    DARK : "dark_theme"
+}
+
 changeThemeResource(getCurrentTheme())
 
 function getCookie(name) {
@@ -16,9 +24,9 @@ function getCurrentTheme() {
         return theme
     }
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return "dark_theme"
+        return themes.DARK
     } else {
-        return "light_theme"
+        return themes.LIGHT
     }
 }
 
