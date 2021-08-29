@@ -24,6 +24,7 @@ window.onload = function () {
 
   document.getElementById("settingsButton").addEventListener("click", toggleSettings)
   document.getElementsByName("theme").forEach(element => element.addEventListener("change", changeTheme))
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", systemThemeChanged)
   document.getElementsByName("difficulty").forEach(element => element.addEventListener("change", changeDifficulty))
   document.addEventListener("keydown", handleKeyInput)
   document.addEventListener("touchstart", handleTouchStart)
@@ -196,6 +197,18 @@ window.onload = function () {
     var theme = event.target.value
     changeThemeResource(theme)
     document.cookie = "theme=" + theme + "; SameSite=Strict;"
+  }
+
+  function systemThemeChanged(event) {
+    if (getCookie("theme") == null) {
+      // The "event" is "(prefers-color-scheme: dark)" changing.
+      // If that value now "matches" then the dark theme has been set on the system.
+      if (event.matches) {
+        changeThemeResource(themes.DARK)
+      } else {
+        changeThemeResource(themes.LIGHT)
+      }
+    }
   }
 
   function changeDifficulty(event) {
