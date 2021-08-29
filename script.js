@@ -12,6 +12,8 @@ window.onload = function () {
   var mode
   var snake
   var targets = []
+  var targetImage = new Image()
+  targetImage.src = "basic_target.svg"
   var nTilesX
   var nTilesY
   /** pixels */
@@ -19,7 +21,9 @@ window.onload = function () {
   var directionQueue = []
   loadModePreference()
   loadHighScore(mode)
-  initGame()
+  targetImage.onload = function() {
+    initGame()
+  }
   
   var prevTime = performance.now() // ms since window loaded.
 
@@ -180,7 +184,7 @@ window.onload = function () {
     document.cookie = "highScore_" + mode + "=" + highScore + "; SameSite=Strict;"
   }
 
-  function initGame() {
+function initGame() {
     updateRate = 300
     score = 0
     scoreElement.innerText = 0
@@ -396,14 +400,22 @@ window.onload = function () {
   function redraw() {
     contextFor2D.clearRect(0, 0, board.width, board.height)
     snake.getSegments().forEach(segment => {
-      drawCircle(segment, tileSize() / 2 - 1, "#60842e")
+      drawCircle(segment, tileSize() / 2 - 1, "#60842e") // uses radius
     })
-    drawEyes(snake, tileSize() / 2 - 1)
+    drawEyes(snake, tileSize() / 2 - 1) // uses radius
     targets.forEach(target => {
-      drawCircle(target.position, tileSize() / 2 - 3, target.color)
+      if (target instanceof BombTarget) { // XXX hack for now
+        drawCircle(target.position, tileSize() / 2 - 3, target.color) // uses radius
+      } else {
+        // to pixelCoords gets us center, subtract radius to get top left of target (where svg is positioned)
+        targetX = toPixelCoords(target.position).x - tileSize() * 0.5 + 3
+        targetY = toPixelCoords(target.position).y - tileSize() * 0.5 + 3
+        contextFor2D.drawImage(targetImage, targetX, targetY, tileSize() - 6, tileSize() - 6) // uses diameter
+      }
     })
   }
 
+  // return target that is overlapped with, or null
   function checkOverlapWithTargets(nextSnakeHead, targets) {
     for (var t = 0; t < targets.length; t++) {
       var target = targets[t]
