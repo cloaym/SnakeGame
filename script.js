@@ -7,7 +7,8 @@ window.onload = function () {
   /** approx time in ms to move snake forward one square/update board */
   var updateRate
   var score
-  var highScore = 0
+  var highScore
+  var difficulty
   var snake
   var target
   var nTilesX
@@ -15,13 +16,15 @@ window.onload = function () {
   /** pixels */
   var tileWidth
   var directionQueue = []
-  loadHighScore()
+  loadDifficultyPreference()
+  loadHighScore(difficulty)
   initGame()
   
   var prevTime = performance.now() // ms since window loaded.
 
   document.getElementById("settingsButton").addEventListener("click", toggleSettings)
   document.getElementsByName("theme").forEach(element => element.addEventListener("change", changeTheme))
+  document.getElementsByName("difficulty").forEach(element => element.addEventListener("change", changeDifficulty))
   document.addEventListener("keydown", handleKeyInput)
   document.addEventListener("touchstart", handleTouchStart)
   document.addEventListener("touchmove", handleTouchMove)
@@ -104,11 +107,7 @@ window.onload = function () {
         gameState = gameStates.FINISHED
         button.textContent = "New Game"
         alert("You lost")
-        if (score > highScore) {
-          highScore = score
-          highScoreElement.innerText = highScore
-          document.cookie = "highScore=" + highScore + "; SameSite=Strict;"
-        }
+        saveHighScore(difficulty)
         initGame()
         return
       }
@@ -120,15 +119,40 @@ window.onload = function () {
     window.requestAnimationFrame(updateBoard)
   }
   
-  function loadHighScore() {
-    var highScore = getCookie("highScore")
-    if (highScore != null) {
+  function loadDifficultyPreference() {
+    var savedDifficulty = getCookie("difficulty")
+    if (savedDifficulty != null) {
+      difficulty = savedDifficulty
+    } else {
+      difficulty = difficulties.EASY
+    }
+  }
+
+  function loadHighScore(difficulty) {
+    var savedHighScore = getCookie("highScore_" + difficulty)
+    if (savedHighScore != null) {
+      highScore = savedHighScore
+    } else {
+      highScore = 0
+    }
+    highScoreElement.innerText = highScore
+    document.getElementById("highScoreLabel").innerText = "High Score (" + capitalizeFirstLetter(difficulty) + ") :"
+  }
+
+  function capitalizeFirstLetter(string) {
+    return string.substring(0, 1).toUpperCase() + string.substring(1)
+  }
+
+  function saveHighScore(difficulty){
+    if (score > highScore) {
+      highScore = score
       highScoreElement.innerText = highScore
+      document.cookie = "highScore_" + difficulty + "=" + highScore + "; SameSite=Strict;"
     }
   }
 
   function initGame() {
-    updateRate = 300 // time in ms to move 1 tile
+    updateRate = 300
     score = 0
     scoreElement.innerText = 0
     setUpBoardSizes()
@@ -137,6 +161,7 @@ window.onload = function () {
     snake = new Snake({i:0, j:0})
     target = getRandomUnoccupiedPosition(snake)
     gameState = gameStates.LOADED
+    hideSettings()
   }
 
   function toggleSettings(event) {
@@ -149,7 +174,20 @@ window.onload = function () {
           theme.checked = "checked"
         }
       })
+      var difficultyOptions = document.getElementsByName("difficulty")
+      difficultyOptions.forEach(difficultyOption => {
+        if (difficultyOption.value == difficulty) {
+          difficultyOption.checked = "checked"
+        }
+      })
     } else {
+      settingsPanel.classList.add("hidden")
+    }
+  }
+
+  function hideSettings() {
+    var settingsPanel = document.getElementById("settings")
+    if (!settingsPanel.classList.contains("hidden")) {
       settingsPanel.classList.add("hidden")
     }
   }
@@ -158,6 +196,24 @@ window.onload = function () {
     var theme = event.target.value
     changeThemeResource(theme)
     document.cookie = "theme=" + theme + "; SameSite=Strict;"
+  }
+
+  function changeDifficulty(event) {
+    var newDifficulty = event.target.value
+    if (gameState == gameStates.PLAYING || gameState == gameStates.PAUSED) {
+      if (confirm("Start new game?")) {
+        saveHighScore(difficulty)
+        gameState = gameStates.FINISHED
+        button.textContent = "New Game"
+      } else {
+        hideSettings()
+        return
+      }
+    }
+    difficulty = newDifficulty
+    loadHighScore(difficulty)
+    document.cookie = "difficulty=" + difficulty + "; SameSite=Strict;"
+    initGame()
   }
 
   function handleKeyInput(event) {
@@ -297,7 +353,23 @@ window.onload = function () {
   }
 
   function increaseSpeed() {
-    updateRate = 0.95 * updateRate
+    updateRate = getAcceleration(difficulty) * updateRate
+  }
+
+  function getAcceleration(difficulty) {
+    var accel = 1
+    switch (difficulty) {
+      case difficulties.EASY :
+        accel = 1
+        break
+      case difficulties.MEDIUM :
+        accel = 0.95
+        break
+      case difficulties.HARD :
+        accel = 0.9
+        break
+    }
+    return accel
   }
 
   function tileSize() {
@@ -389,6 +461,12 @@ window.onload = function () {
     }
     return ret
   }
+}
+
+const difficulties = {
+  EASY : "easy",
+  MEDIUM : "medium",
+  HARD : "hard"
 }
 
 const gameStates = {

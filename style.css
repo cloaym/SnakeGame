@@ -19,6 +19,10 @@ button {
     margin-right: auto;
 	margin-bottom: 15px;
 }
+fieldset {
+	display: inline-block;
+	padding-bottom: 15px
+}
 #settings {
 	padding-bottom: 12px;
 }

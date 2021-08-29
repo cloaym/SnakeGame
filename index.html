@@ -31,10 +31,22 @@
 		</button>
 		<br>
 		<div class="hidden" id="settings">
-			<input type="radio" id="light" name="theme" value="light_theme">
- 			<label for="light">Light</label>
-			<input type="radio" id="dark" name="theme" value="dark_theme">
- 			<label for="dark">Dark</label>
+			<fieldset>
+				<legend>Appearance</legend>
+				<input type="radio" id="light" name="theme" value="light_theme">
+ 				<label for="light">Light</label>
+				<input type="radio" id="dark" name="theme" value="dark_theme">
+ 				<label for="dark">Dark</label>
+			</fieldset>
+			<fieldset>
+				<legend>Difficulty</legend>
+				<input type="radio" id="easy" name="difficulty" value="easy">
+ 				<label for="easy">Easy</label>
+				<input type="radio" id="medium" name="difficulty" value="medium">
+ 				<label for="medium">Medium</label>
+				<input type="radio" id="hard" name="difficulty" value="hard">
+ 				<label for="hard">Hard</label>
+			</fieldset>
 		</div>
 		<canvas id="board"></canvas>
 		<div class="flex-parent">
@@ -43,7 +55,7 @@
 				<p id="score">0</p>
 			</div>
 			<div class="score-group">
-				<p>High Score: </p> 
+				<p id="highScoreLabel">High Score: </p> 
 				<p id="highScore">0</p>
 			</div>
 		</div>
