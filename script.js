@@ -3,7 +3,8 @@ window.onload = function () {
   var scoreElement = document.getElementById("score")
   var highScoreElement = document.getElementById("highScore")
   var contextFor2D = board.getContext("2d")
-  var gameState
+  var confetti
+  var gameState = gameStates.LOADED
   /** approx time in ms to move snake forward one square/update board */
   var updateRate
   var score
@@ -81,6 +82,10 @@ window.onload = function () {
         window.requestAnimationFrame(updateBoard)
         break
       case gameStates.FINISHED :
+        if (confetti) {
+          // clear() can only be called once - must be re-initialized/rendered before next call
+          confetti.clear()
+        }
         gameState = gameStates.PLAYING
         button.textContent = "Paused"
         window.requestAnimationFrame(updateBoard)
@@ -107,8 +112,15 @@ window.onload = function () {
       if (snake.checkOverlapWithSelf() || outOfFrame()) {
         gameState = gameStates.FINISHED
         button.textContent = "New Game"
-        alert("You lost")
-        saveHighScore(difficulty)
+        if (score > highScore) {
+          // set confetti settings here because scrollHeight changes after loading
+          var confettiSettings = {target: "confetti", height: document.documentElement.scrollHeight}
+          confetti = new ConfettiGenerator(confettiSettings)
+          confetti.render()
+          saveHighScore(difficulty)
+        } else {
+          alert("You lost")
+        }
         initGame()
         return
       }
@@ -144,12 +156,10 @@ window.onload = function () {
     return string.substring(0, 1).toUpperCase() + string.substring(1)
   }
 
-  function saveHighScore(difficulty){
-    if (score > highScore) {
-      highScore = score
-      highScoreElement.innerText = highScore
-      document.cookie = "highScore_" + difficulty + "=" + highScore + "; SameSite=Strict;"
-    }
+  function saveHighScore(difficulty) {
+    highScore = score
+    highScoreElement.innerText = highScore
+    document.cookie = "highScore_" + difficulty + "=" + highScore + "; SameSite=Strict;"
   }
 
   function initGame() {
@@ -161,7 +171,6 @@ window.onload = function () {
     board.height = nTilesY * tileSize()
     snake = new Snake({i:0, j:0})
     target = getRandomUnoccupiedPosition(snake)
-    gameState = gameStates.LOADED
     hideSettings()
   }
 
@@ -265,7 +274,7 @@ window.onload = function () {
     const firstTouch = event.touches[0]
     xDown = firstTouch.clientX
     yDown = firstTouch.clientY
-  };
+  }
 
   /**
    * Modified from
@@ -277,11 +286,11 @@ window.onload = function () {
       return;
     }
 
-    var xUp = event.touches[0].clientX;
-    var yUp = event.touches[0].clientY;
+    var xUp = event.touches[0].clientX
+    var yUp = event.touches[0].clientY
 
-    var xDiff = xDown - xUp;
-    var yDiff = yDown - yUp;
+    var xDiff = xDown - xUp
+    var yDiff = yDown - yUp
 
     if (Math.abs(xDiff) > Math.abs(yDiff)) { // horizontal component larger
       if (xDiff > 0) {
@@ -301,9 +310,9 @@ window.onload = function () {
       }
     }
     /* reset values */
-    xDown = null;
-    yDown = null;
-  };
+    xDown = null
+    yDown = null
+  }
 
   function handleDirectionChange(event, direction) {
     event.preventDefault() // stop scrolling
@@ -438,7 +447,7 @@ window.onload = function () {
 
   function drawCircleAt(coord, radius, color) {
     contextFor2D.beginPath()
-    contextFor2D.strokeStyle = color;
+    contextFor2D.strokeStyle = color
     contextFor2D.arc(coord.x, coord.y, radius, 0, 2 * Math.PI)
     contextFor2D.fillStyle = color
     contextFor2D.fill()
@@ -483,10 +492,10 @@ const difficulties = {
 }
 
 const gameStates = {
-  LOADED : "loaded", // hasn't started
+  LOADED : "loaded", // first loaded page
   PLAYING : "playing",
   PAUSED : "paused",
-  FINISHED : "finished" // lost
+  FINISHED : "finished" // game over
 }
 
 function Snake(pos) {

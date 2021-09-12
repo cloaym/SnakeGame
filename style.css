@@ -26,6 +26,15 @@ fieldset {
 #settings {
 	padding-bottom: 12px;
 }
+#confetti {
+	position: absolute;
+	border: none;
+	z-index: 1;
+	pointer-events: none;
+	top: 0;
+	right: 0;
+	width: 100%;
+}
 .hidden {
 	display: none;
 }
