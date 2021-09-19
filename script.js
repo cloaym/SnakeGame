@@ -149,7 +149,7 @@ window.onload = function () {
       highScore = 0
     }
     highScoreElement.innerText = highScore
-    document.getElementById("highScoreLabel").innerText = "High Score (" + capitalizeFirstLetter(difficulty) + ") :"
+    document.getElementById("highScoreLabel").innerText = "High Score (" + capitalizeFirstLetter(difficulty) + "):"
   }
 
   function capitalizeFirstLetter(string) {

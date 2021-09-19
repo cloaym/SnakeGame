@@ -43,9 +43,14 @@ fieldset {
 	flex-flow: row wrap;
 	margin-left: auto;
 	margin-right: auto;
-	width: 20%;
+	width: 100%;
 	justify-content: space-evenly;
 }
-.score-group {
-	flex-basis: 50%;
+.score-labels {
+	flex-basis: 40%;
+	text-align: right;
+}
+.score-values {
+	flex-basis: 40%;
+	text-align: left;
 }
