@@ -11,7 +11,7 @@ window.onload = function () {
   var highScore
   var difficulty
   var snake
-  var target
+  var targets = []
   var nTilesX
   var nTilesY
   /** pixels */
@@ -100,8 +100,9 @@ window.onload = function () {
         snake.dir = directionQueue.shift()
       }
       var nextPosition = snake.getNextPosition()
-      if (checkOverlapWithTarget(nextPosition, target)) {
-        activate(target, nextPosition)
+      activatedTarget = checkOverlapWithTargets(nextPosition, targets)
+      if (activatedTarget) {
+        activate(activatedTarget, nextPosition)
       } else {
         growOrMoveSnake(nextPosition, false)
       }
@@ -124,7 +125,7 @@ window.onload = function () {
       changeScore(target.getScoreChange())
       changeSpeed(target.getNewUpdateRate(updateRate, difficulty))
       growOrMoveSnake(nextPosition, target.shouldIncreaseSnakeSize())
-      moveTarget(snake) // TODO - change spawning so it is independent of consuming target
+      moveTarget(activatedTarget, snake) // TODO - change spawning so it is independent of consuming target
     }
   }
 
@@ -182,7 +183,7 @@ window.onload = function () {
     board.width = nTilesX * tileSize()
     board.height = nTilesY * tileSize()
     snake = new Snake({i:0, j:0})
-    target = new Target(getRandomUnoccupiedPosition(snake))
+    targets = [new Target(getRandomUnoccupiedPosition(snake))]
     hideSettings()
   }
 
@@ -364,8 +365,9 @@ window.onload = function () {
     }
   }
 
-  function moveTarget(snake) {
-    target = new Target(getRandomUnoccupiedPosition(snake))
+  function moveTarget(activatedTarget, snake) {
+    targets.splice(targets.indexOf(activatedTarget))
+    targets.push(new Target(getRandomUnoccupiedPosition(snake)))
   }
 
   function redraw() {
@@ -374,12 +376,19 @@ window.onload = function () {
       drawCircle(segment, tileSize() / 2 - 1, "#60842e")
     })
     drawEyes(snake, tileSize() / 2 - 1)
-    drawCircle(target.position, tileSize() / 2 - 3, target.color)
+    targets.forEach(target => {
+      drawCircle(target.position, tileSize() / 2 - 3, target.color)
+    })
   }
 
-  // return true if snake overlaps target
-  function checkOverlapWithTarget(nextSnakeHead, target) {
-    return (nextSnakeHead.i == target.position.i) && (nextSnakeHead.j == target.position.j)
+  function checkOverlapWithTargets(nextSnakeHead, targets) {
+    for (var t = 0; t < targets.length; t++) {
+      var target = targets[t]
+      if ((nextSnakeHead.i == target.position.i) && (nextSnakeHead.j == target.position.j)) {
+        return target
+      }
+    }
+    return null
   }
 
   function changeScore(delta) {
@@ -425,6 +434,12 @@ window.onload = function () {
         var isOccupied = false
         for (const segment of snake.getSegments()) {
           if (col === segment.i && row === segment.j) {
+            isOccupied = true
+            break
+          }
+        }
+        for (const target of targets) {
+          if (col === target.position.i && row === target.position.j) {
             isOccupied = true
             break
           }
