@@ -378,7 +378,19 @@ window.onload = function () {
   }
 
   function spawnTarget(snake) {
-    targets.push(new Target(getRandomUnoccupiedPosition(snake)))
+    var pos = getRandomUnoccupiedPosition(snake)
+    var target
+    if (mode != modes.ARCADE) {
+      target = new Target(pos)
+    } else {
+      const rand = getRandomInt(100)
+      if (rand < 30) {
+        target = new BombTarget(pos)
+      } else {
+        target = new Target(pos)
+      }
+    }
+    targets.push(target)
   }
 
   function redraw() {

@@ -45,3 +45,13 @@ class Target {
         return currentUpdateRate * accel
     }
 }
+
+class BombTarget extends Target {
+    get color() {
+        return "red";
+    }
+
+    didLose() {
+        return true;
+    }
+}
