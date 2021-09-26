@@ -9,7 +9,7 @@ window.onload = function () {
   var updateRate
   var score
   var highScore
-  var difficulty
+  var mode
   var snake
   var targets = []
   var nTilesX
@@ -17,8 +17,8 @@ window.onload = function () {
   /** pixels */
   var tileWidth
   var directionQueue = []
-  loadDifficultyPreference()
-  loadHighScore(difficulty)
+  loadModePreference()
+  loadHighScore(mode)
   initGame()
   
   var prevTime = performance.now() // ms since window loaded.
@@ -26,7 +26,7 @@ window.onload = function () {
   document.getElementById("settingsButton").addEventListener("click", toggleSettings)
   document.getElementsByName("theme").forEach(element => element.addEventListener("change", changeTheme))
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", systemThemeChanged)
-  document.getElementsByName("difficulty").forEach(element => element.addEventListener("change", changeDifficulty))
+  document.getElementsByName("mode").forEach(element => element.addEventListener("change", changeMode))
   document.addEventListener("keydown", handleKeyInput)
   document.addEventListener("touchstart", handleTouchStart)
   document.addEventListener("touchmove", handleTouchMove)
@@ -105,6 +105,11 @@ window.onload = function () {
         activate(activatedTarget, nextPosition)
       } else {
         growOrMoveSnake(nextPosition, false)
+        // at a semi-random interval, spawn target
+        const rand = getRandomInt(1000)
+        if (mode == modes.ARCADE && rand < 25) {
+          spawnTarget(snake)
+        }
       }
 
       if (snake.checkOverlapWithSelf() || outOfFrame()) {
@@ -123,7 +128,7 @@ window.onload = function () {
       endGame()
     } else {
       changeScore(target.getScoreChange())
-      changeSpeed(target.getNewUpdateRate(updateRate, difficulty))
+      changeSpeed(target.getNewUpdateRate(updateRate, mode))
       growOrMoveSnake(nextPosition, target.shouldIncreaseSnakeSize())
       moveTarget(activatedTarget, snake) // TODO - change spawning so it is independent of consuming target
     }
@@ -137,7 +142,7 @@ window.onload = function () {
           var confettiSettings = {target: "confetti", height: document.documentElement.scrollHeight}
           confetti = new ConfettiGenerator(confettiSettings)
           confetti.render()
-          saveHighScore(difficulty)
+          saveHighScore(mode)
         } else {
           alert("You lost")
         }
@@ -145,34 +150,34 @@ window.onload = function () {
         return
   }
   
-  function loadDifficultyPreference() {
-    var savedDifficulty = getCookie("difficulty")
-    if (savedDifficulty != null) {
-      difficulty = savedDifficulty
+  function loadModePreference() {
+    var savedMode = getCookie("difficulty") // for backwards compatibility, mode used to be called difficulty
+    if (savedMode != null) {
+      mode = savedMode
     } else {
-      difficulty = difficulties.EASY
+      mode = modes.EASY
     }
   }
 
-  function loadHighScore(difficulty) {
-    var savedHighScore = getCookie("highScore_" + difficulty)
+  function loadHighScore(mode) {
+    var savedHighScore = getCookie("highScore_" + mode)
     if (savedHighScore != null) {
       highScore = savedHighScore
     } else {
       highScore = 0
     }
     highScoreElement.innerText = highScore
-    document.getElementById("highScoreLabel").innerText = "High Score (" + capitalizeFirstLetter(difficulty) + "):"
+    document.getElementById("highScoreLabel").innerText = "High Score (" + capitalizeFirstLetter(mode) + "):"
   }
 
   function capitalizeFirstLetter(string) {
     return string.substring(0, 1).toUpperCase() + string.substring(1)
   }
 
-  function saveHighScore(difficulty) {
+  function saveHighScore(mode) {
     highScore = score
     highScoreElement.innerText = highScore
-    document.cookie = "highScore_" + difficulty + "=" + highScore + "; SameSite=Strict;"
+    document.cookie = "highScore_" + mode + "=" + highScore + "; SameSite=Strict;"
   }
 
   function initGame() {
@@ -197,10 +202,10 @@ window.onload = function () {
           theme.checked = "checked"
         }
       })
-      var difficultyOptions = document.getElementsByName("difficulty")
-      difficultyOptions.forEach(difficultyOption => {
-        if (difficultyOption.value == difficulty) {
-          difficultyOption.checked = "checked"
+      var modeOptions = document.getElementsByName("mode")
+      modeOptions.forEach(modeOption => {
+        if (modeOption.value == mode) {
+          modeOption.checked = "checked"
         }
       })
     } else {
@@ -233,11 +238,11 @@ window.onload = function () {
     }
   }
 
-  function changeDifficulty(event) {
-    var newDifficulty = event.target.value
+  function changeMode(event) {
+    var newMode = event.target.value
     if (gameState == gameStates.PLAYING || gameState == gameStates.PAUSED) {
       if (confirm("Start new game?")) {
-        saveHighScore(difficulty)
+        saveHighScore(mode)
         gameState = gameStates.FINISHED
         button.textContent = "New Game"
       } else {
@@ -245,9 +250,9 @@ window.onload = function () {
         return
       }
     }
-    difficulty = newDifficulty
-    loadHighScore(difficulty)
-    document.cookie = "difficulty=" + difficulty + "; SameSite=Strict;"
+    mode = newMode
+    loadHighScore(mode)
+    document.cookie = "difficulty=" + mode + "; SameSite=Strict;" // mode used to be called "difficulty"
     initGame()
   }
 
@@ -366,7 +371,13 @@ window.onload = function () {
   }
 
   function moveTarget(activatedTarget, snake) {
-    targets.splice(targets.indexOf(activatedTarget))
+    // we don't need to handle the case where activatedTarget
+    // is not in the array, since it comes directly from "targets"
+    targets.splice(targets.indexOf(activatedTarget), 1)
+    spawnTarget(snake)
+  }
+
+  function spawnTarget(snake) {
     targets.push(new Target(getRandomUnoccupiedPosition(snake)))
   }
 
@@ -398,22 +409,6 @@ window.onload = function () {
 
   function changeSpeed(newUpdateRate) {
     updateRate = newUpdateRate
-  }
-
-  function getAcceleration(difficulty) {
-    var accel = 1
-    switch (difficulty) {
-      case difficulties.EASY :
-        accel = 1
-        break
-      case difficulties.MEDIUM :
-        accel = 0.95
-        break
-      case difficulties.HARD :
-        accel = 0.9
-        break
-    }
-    return accel
   }
 
   function tileSize() {
@@ -513,10 +508,11 @@ window.onload = function () {
   }
 }
 
-const difficulties = {
+const modes = {
   EASY : "easy",
   MEDIUM : "medium",
-  HARD : "hard"
+  HARD : "hard",
+  ARCADE : "arcade"
 }
 
 const gameStates = {

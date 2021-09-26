@@ -28,16 +28,17 @@ class Target {
         return true;
     }
 
-    getNewUpdateRate(currentUpdateRate, difficulty) {
+    getNewUpdateRate(currentUpdateRate, mode) {
         var accel = 1
-        switch (difficulty) {
-          case difficulties.EASY :
+        switch (mode) {
+          case modes.EASY :
+          case modes.ARCADE :
             accel = 1
             break
-          case difficulties.MEDIUM :
+          case modes.MEDIUM :
             accel = 0.95
             break
-          case difficulties.HARD :
+          case modes.HARD :
             accel = 0.9
             break
         }
