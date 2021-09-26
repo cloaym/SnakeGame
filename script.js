@@ -498,58 +498,60 @@ const gameStates = {
   FINISHED : "finished" // game over
 }
 
-function Snake(pos) {
-  this.segments = []
-  this.dir = "right"
-  this.segments.push(pos)
-  return this
-}
-
-Snake.prototype.getHead = function () {
-  return this.segments[0]
-}
-
-Snake.prototype.getSegments = function () {
-  return this.segments
-}
-
-Snake.prototype.getNextPosition = function () {
-  var nextPos = {
-    i: this.getHead().i,
-    j: this.getHead().j
+class Snake {
+  constructor(pos) {
+    this.segments = []
+    this.dir = "right"
+    this.segments.push(pos)
+    return this
   }
-
-  switch (this.dir) {
-    case "up":
-      nextPos.j -= 1
-      break
-    case "down":
-      nextPos.j += 1
-      break
-    case "right":
-      nextPos.i += 1
-      break
-    case "left":
-      nextPos.i -= 1
-      break
+  getHead() {
+    return this.segments[0]
   }
-  return nextPos
-}
-
-Snake.prototype.addToFront = function (nextPos) {
-  this.segments.unshift(nextPos)
-}
-
-Snake.prototype.moveBackToFront = function (nextPos) {
-  this.segments.pop()
-  this.segments.unshift(nextPos)
-}
-
-Snake.prototype.checkOverlapWithSelf = function () {
-  for (var n = 1; n < this.segments.length; n++) {
-    if ((this.getHead().i == this.segments[n].i) && (this.getHead().j == this.segments[n].j)) {
-      return true
+  getSegments() {
+    return this.segments
+  }
+  getNextPosition() {
+    var nextPos = {
+      i: this.getHead().i,
+      j: this.getHead().j
     }
+
+    switch (this.dir) {
+      case "up":
+        nextPos.j -= 1
+        break
+      case "down":
+        nextPos.j += 1
+        break
+      case "right":
+        nextPos.i += 1
+        break
+      case "left":
+        nextPos.i -= 1
+        break
+    }
+    return nextPos
   }
-  return false
+  addToFront(nextPos) {
+    this.segments.unshift(nextPos)
+  }
+  moveBackToFront(nextPos) {
+    this.segments.pop()
+    this.segments.unshift(nextPos)
+  }
+  checkOverlapWithSelf() {
+    for (var n = 1; n < this.segments.length; n++) {
+      if ((this.getHead().i == this.segments[n].i) && (this.getHead().j == this.segments[n].j)) {
+        return true
+      }
+    }
+    return false
+  }
 }
+
+
+
+
+
+
