@@ -101,16 +101,35 @@ window.onload = function () {
       }
       var nextPosition = snake.getNextPosition()
       if (checkOverlapWithTarget(nextPosition, target)) {
-        increaseScore(scoreElement)
-        increaseSpeed()
-        growOrMoveSnake(nextPosition, true)
-        moveTarget(snake)
+        activate(target, nextPosition)
       } else {
         growOrMoveSnake(nextPosition, false)
       }
 
       if (snake.checkOverlapWithSelf() || outOfFrame()) {
-        gameState = gameStates.FINISHED
+        endGame()
+      }
+
+      redraw() // draw everything
+      prevTime = timeStamp
+    }
+
+    window.requestAnimationFrame(updateBoard)
+  }
+
+  function activate(target, nextPosition) {
+    if (target.didLose()) {
+      endGame()
+    } else {
+      changeScore(target.getScoreChange())
+      changeSpeed(target.getNewUpdateRate(updateRate, difficulty))
+      growOrMoveSnake(nextPosition, target.shouldIncreaseSnakeSize())
+      moveTarget(snake) // TODO - change spawning so it is independent of consuming target
+    }
+  }
+
+  function endGame() {
+    gameState = gameStates.FINISHED
         button.textContent = "New Game"
         if (score > highScore) {
           // set confetti settings here because scrollHeight changes after loading
@@ -123,13 +142,6 @@ window.onload = function () {
         }
         initGame()
         return
-      }
-
-      redraw() // draw everything
-      prevTime = timeStamp
-    }
-
-    window.requestAnimationFrame(updateBoard)
   }
   
   function loadDifficultyPreference() {
@@ -170,7 +182,7 @@ window.onload = function () {
     board.width = nTilesX * tileSize()
     board.height = nTilesY * tileSize()
     snake = new Snake({i:0, j:0})
-    target = getRandomUnoccupiedPosition(snake)
+    target = new Target(getRandomUnoccupiedPosition(snake))
     hideSettings()
   }
 
@@ -344,8 +356,8 @@ window.onload = function () {
     directionQueue.push(direction)
   }
 
-  function growOrMoveSnake(nextPosition, ateTarget) {
-    if (ateTarget) {
+  function growOrMoveSnake(nextPosition, shouldGrow) {
+    if (shouldGrow) {
       snake.addToFront(nextPosition)
     } else {
       snake.moveBackToFront(nextPosition)
@@ -353,7 +365,7 @@ window.onload = function () {
   }
 
   function moveTarget(snake) {
-    target = getRandomUnoccupiedPosition(snake)
+    target = new Target(getRandomUnoccupiedPosition(snake))
   }
 
   function redraw() {
@@ -362,20 +374,21 @@ window.onload = function () {
       drawCircle(segment, tileSize() / 2 - 1, "#60842e")
     })
     drawEyes(snake, tileSize() / 2 - 1)
-    drawCircle(target, tileSize() / 2 - 3, "#a67244")
+    drawCircle(target.position, tileSize() / 2 - 3, target.color)
   }
 
   // return true if snake overlaps target
   function checkOverlapWithTarget(nextSnakeHead, target) {
-    return (nextSnakeHead.i == target.i) && (nextSnakeHead.j == target.j)
+    return (nextSnakeHead.i == target.position.i) && (nextSnakeHead.j == target.position.j)
   }
 
-  function increaseScore(scoreElement) {
-    scoreElement.innerText = ++score
+  function changeScore(delta) {
+    score += delta
+    scoreElement.innerText = score
   }
 
-  function increaseSpeed() {
-    updateRate = getAcceleration(difficulty) * updateRate
+  function changeSpeed(newUpdateRate) {
+    updateRate = newUpdateRate
   }
 
   function getAcceleration(difficulty) {
@@ -497,61 +510,3 @@ const gameStates = {
   PAUSED : "paused",
   FINISHED : "finished" // game over
 }
-
-class Snake {
-  constructor(pos) {
-    this.segments = []
-    this.dir = "right"
-    this.segments.push(pos)
-    return this
-  }
-  getHead() {
-    return this.segments[0]
-  }
-  getSegments() {
-    return this.segments
-  }
-  getNextPosition() {
-    var nextPos = {
-      i: this.getHead().i,
-      j: this.getHead().j
-    }
-
-    switch (this.dir) {
-      case "up":
-        nextPos.j -= 1
-        break
-      case "down":
-        nextPos.j += 1
-        break
-      case "right":
-        nextPos.i += 1
-        break
-      case "left":
-        nextPos.i -= 1
-        break
-    }
-    return nextPos
-  }
-  addToFront(nextPos) {
-    this.segments.unshift(nextPos)
-  }
-  moveBackToFront(nextPos) {
-    this.segments.pop()
-    this.segments.unshift(nextPos)
-  }
-  checkOverlapWithSelf() {
-    for (var n = 1; n < this.segments.length; n++) {
-      if ((this.getHead().i == this.segments[n].i) && (this.getHead().j == this.segments[n].j)) {
-        return true
-      }
-    }
-    return false
-  }
-}
-
-
-
-
-
-
