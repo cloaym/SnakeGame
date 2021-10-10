@@ -1,3 +1,4 @@
+var pathToTheme
 const themes = {
     // These strings also need to match:
     // - the names of the linked CSS theme files
@@ -31,6 +32,6 @@ function getCurrentTheme() {
 }
 
 function changeThemeResource(theme) {
-    // TODO load all the images in the theme 
-    document.getElementById("themeStyle").href = "themes/" + theme + "/theme" + ".css"
+    pathToTheme = "themes/" + theme + "/";
+    document.getElementById("themeStyle").href = pathToTheme + "theme" + ".css"
 }

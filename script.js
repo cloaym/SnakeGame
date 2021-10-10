@@ -13,7 +13,6 @@ window.onload = function () {
   var snake
   var targets = []
   var targetImage = new Image()
-  targetImage.src = "themes/light/basic_target.svg"
   var nTilesX
   var nTilesY
   /** pixels */
@@ -21,9 +20,24 @@ window.onload = function () {
   var directionQueue = []
   loadModePreference()
   loadHighScore(mode)
-  targetImage.onload = function() {
-    initGame()
+
+  function loadThemeResources() {
+    return new Promise((resolve, reject) => {
+      const expectedNumResources = 1
+      var numLoaded = 0
+      targetImage = new Image()
+      targetImage.onload = () => {
+        if (++numLoaded == expectedNumResources) {
+          console.log("loaded our target Image!!")
+          resolve()
+        }
+      }
+      targetImage.src = pathToTheme + "basic_target.svg"
+    })
   }
+
+  loadThemeResources()
+    .then(() => initGame())
   
   var prevTime = performance.now() // ms since window loaded.
 
@@ -228,7 +242,8 @@ function initGame() {
     var theme = event.target.value
     changeThemeResource(theme)
     document.cookie = "theme=" + theme + "; SameSite=Strict;"
-    // TODO this should redraw board (for theme-dependent targets/board)
+    loadThemeResources()
+      .then(() => redraw())
   }
 
   function systemThemeChanged(event) {
@@ -399,6 +414,7 @@ function initGame() {
   }
 
   function redraw() {
+    console.log(pathToTheme)
     contextFor2D.clearRect(0, 0, board.width, board.height)
     snake.getSegments().forEach(segment => {
       drawCircle(segment, tileSize() / 2 - 1, "#60842e") // uses radius
