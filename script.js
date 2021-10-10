@@ -13,7 +13,7 @@ window.onload = function () {
   var snake
   var targets = []
   var targetImage = new Image()
-  targetImage.src = "basic_target.svg"
+  targetImage.src = "themes/light/basic_target.svg"
   var nTilesX
   var nTilesY
   /** pixels */
@@ -228,6 +228,7 @@ function initGame() {
     var theme = event.target.value
     changeThemeResource(theme)
     document.cookie = "theme=" + theme + "; SameSite=Strict;"
+    // TODO this should redraw board (for theme-dependent targets/board)
   }
 
   function systemThemeChanged(event) {
@@ -410,6 +411,7 @@ function initGame() {
         // to pixelCoords gets us center, subtract radius to get top left of target (where svg is positioned)
         targetX = toPixelCoords(target.position).x - tileSize() * 0.5 + 3
         targetY = toPixelCoords(target.position).y - tileSize() * 0.5 + 3
+        // TODO do we need to change targetImage?
         contextFor2D.drawImage(targetImage, targetX, targetY, tileSize() - 6, tileSize() - 6) // uses diameter
       }
     })

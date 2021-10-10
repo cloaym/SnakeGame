@@ -2,8 +2,8 @@ const themes = {
     // These strings also need to match:
     // - the names of the linked CSS theme files
     // - the "value" of the radio buttons for choosing the theme
-    LIGHT : "light_theme",
-    DARK : "dark_theme"
+    LIGHT : "light",
+    DARK : "dark"
 }
 
 changeThemeResource(getCurrentTheme())
@@ -31,5 +31,6 @@ function getCurrentTheme() {
 }
 
 function changeThemeResource(theme) {
-    document.getElementById("themeStyle").href = theme + ".css"
+    // TODO load all the images in the theme 
+    document.getElementById("themeStyle").href = "themes/" + theme + "/theme" + ".css"
 }
