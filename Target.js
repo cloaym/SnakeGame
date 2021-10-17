@@ -10,9 +10,12 @@ class Target {
         return this.position;
     }
 
-    get color() {
-        // TODO - eventually support svg based on type and theme
-        return "#a67244";
+    static get imageName() {
+        return "basic_target";
+    }
+
+    get imageName() {
+        return Target.imageName; // can't call the static version from an instance??
     }
 
     didLose() {
@@ -47,8 +50,13 @@ class Target {
 }
 
 class BombTarget extends Target {
-    get color() {
-        return "red";
+
+    static get imageName() {
+        return "bomb_target";
+    }
+
+    get imageName() {
+        return BombTarget.imageName;
     }
 
     didLose() {

@@ -12,7 +12,7 @@ window.onload = function () {
   var mode
   var snake
   var targets = []
-  var targetImage = new Image()
+  var themeImages = new Map()
   var nTilesX
   var nTilesY
   /** pixels */
@@ -21,21 +21,29 @@ window.onload = function () {
   loadModePreference()
   loadHighScore(mode)
 
+  function initThemeResourceKeys() {
+    themeImages.set(Target.imageName, null);
+    themeImages.set(BombTarget.imageName, null);
+  }
+
   function loadThemeResources() {
     return new Promise((resolve, reject) => {
-      const expectedNumResources = 1
+      const expectedNumResources = themeImages.size;
       var numLoaded = 0
-      targetImage = new Image()
-      targetImage.onload = () => {
-        if (++numLoaded == expectedNumResources) {
-          console.log("loaded our target Image!!")
-          resolve()
+      for (const key of themeImages.keys()) {
+        var image = new Image();
+        themeImages.set(key, image);
+        image.onload = () => {
+          if (++numLoaded == expectedNumResources) {
+            resolve()
+          }
         }
+        image.src = pathToTheme + key + ".svg"
       }
-      targetImage.src = pathToTheme + "basic_target.svg"
     })
   }
 
+  initThemeResourceKeys()
   loadThemeResources()
     .then(() => initGame())
   
@@ -148,7 +156,7 @@ window.onload = function () {
       changeScore(target.getScoreChange())
       changeSpeed(target.getNewUpdateRate(updateRate, mode))
       growOrMoveSnake(nextPosition, target.shouldIncreaseSnakeSize())
-      moveTarget(activatedTarget, snake) // TODO - change spawning so it is independent of consuming target
+      moveTarget(activatedTarget, snake)
     }
   }
 
@@ -414,22 +422,16 @@ function initGame() {
   }
 
   function redraw() {
-    console.log(pathToTheme)
     contextFor2D.clearRect(0, 0, board.width, board.height)
     snake.getSegments().forEach(segment => {
       drawCircle(segment, tileSize() / 2 - 1, "#60842e") // uses radius
     })
     drawEyes(snake, tileSize() / 2 - 1) // uses radius
     targets.forEach(target => {
-      if (target instanceof BombTarget) { // XXX hack for now
-        drawCircle(target.position, tileSize() / 2 - 3, target.color) // uses radius
-      } else {
-        // to pixelCoords gets us center, subtract radius to get top left of target (where svg is positioned)
-        targetX = toPixelCoords(target.position).x - tileSize() * 0.5 + 3
-        targetY = toPixelCoords(target.position).y - tileSize() * 0.5 + 3
-        // TODO do we need to change targetImage?
-        contextFor2D.drawImage(targetImage, targetX, targetY, tileSize() - 6, tileSize() - 6) // uses diameter
-      }
+      // to pixelCoords gets us center, subtract radius to get top left of target (where svg is positioned)
+      targetX = toPixelCoords(target.position).x - tileSize() * 0.5 + 3
+      targetY = toPixelCoords(target.position).y - tileSize() * 0.5 + 3
+      contextFor2D.drawImage(themeImages.get(target.imageName), targetX, targetY, tileSize() - 6, tileSize() - 6) // uses diameter
     })
   }
 
