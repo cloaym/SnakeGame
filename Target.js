@@ -63,3 +63,33 @@ class BombTarget extends Target {
         return true;
     }
 }
+
+class SpeedUpTarget extends Target {
+
+    static get imageName() {
+        return "fast_target"; // used Twemoji high voltage (lightning bolt)
+    }
+
+    get imageName() {
+        return SpeedUpTarget.imageName;
+    }
+
+    getNewUpdateRate(currentUpdateRate, mode) {
+        return currentUpdateRate * 0.6;
+    }
+}
+
+class SlowDownTarget extends Target {
+
+    static get imageName() {
+        return "slow_target"; // used Twemoji turtle
+    }
+
+    get imageName() {
+        return SlowDownTarget.imageName;
+    }
+
+    getNewUpdateRate(currentUpdateRate, mode) {
+        return currentUpdateRate * 1.5;
+    }
+}

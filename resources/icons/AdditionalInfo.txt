@@ -1,0 +1,3 @@
+Obtained from:
+Boostrap Icons
+https://icons.getbootstrap.com/

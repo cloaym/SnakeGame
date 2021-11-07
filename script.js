@@ -24,6 +24,8 @@ window.onload = function () {
   function initThemeResourceKeys() {
     themeImages.set(Target.imageName, null);
     themeImages.set(BombTarget.imageName, null);
+    themeImages.set(SpeedUpTarget.imageName, null);
+    themeImages.set(SlowDownTarget.imageName, null);
   }
 
   function loadThemeResources() {
@@ -411,14 +413,24 @@ function initGame() {
     if (mode != modes.ARCADE) {
       target = new Target(pos)
     } else {
+      const pctNormal = 50
+      const pctBomb = 20
+      const pctSpeedChange = 30
       const rand = getRandomInt(100)
-      if (rand < 30) {
-        target = new BombTarget(pos)
-      } else {
+      if (rand < pctNormal) {
         target = new Target(pos)
+        targets.push(target)
+      } else if (rand < pctNormal + pctBomb) {
+        target = new BombTarget(pos)
+        targets.push(target)
+      } else {
+        target = new SpeedUpTarget(pos)
+        targets.push(target)
+        var bonusPos = getRandomUnoccupiedPosition(snake)
+        var bonusTarget = new SlowDownTarget(bonusPos)
+        targets.push(bonusTarget)
       }
     }
-    targets.push(target)
   }
 
   function redraw() {
