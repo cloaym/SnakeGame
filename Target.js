@@ -36,6 +36,7 @@ class Target {
         switch (mode) {
           case modes.EASY :
           case modes.ARCADE :
+          case modes.ZEN :
             accel = 1
             break
           case modes.MEDIUM :

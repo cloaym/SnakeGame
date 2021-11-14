@@ -11,6 +11,10 @@ class Snake {
   getSegments() {
     return this.segments;
   }
+  /**
+   * Does not change internal state of Snake.
+   * @returns next position of the snake based on direction (assumes infinite board), in indexes
+   */
   getNextPosition() {
     var nextPos = {
       i: this.getHead().i,

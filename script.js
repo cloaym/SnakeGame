@@ -128,6 +128,9 @@ window.onload = function () {
         snake.dir = directionQueue.shift()
       }
       var nextPosition = snake.getNextPosition()
+      if (mode == modes.ZEN) {
+        nextPosition = applyWrapping(nextPosition, nTilesX, nTilesY)
+      }
       activatedTarget = checkOverlapWithTargets(nextPosition, targets)
       if (activatedTarget) {
         activate(activatedTarget, nextPosition)
@@ -411,7 +414,7 @@ function initGame() {
     var pos = getRandomUnoccupiedPosition(snake)
     var target
     if (mode != modes.ARCADE) {
-      target = new Target(pos)
+      targets.push(new Target(pos))
     } else {
       const pctNormal = 50
       const pctBomb = 20
@@ -447,6 +450,13 @@ function initGame() {
     })
   }
 
+  function applyWrapping(position, numBoardCols, numBoardRows) {
+    return {
+      // more than just "%" because in JS, mod of negative number is negative (e.g. -1 % 10 = -1)
+      i : ((position.i % numBoardCols) + numBoardCols) % numBoardCols,
+      j : ((position.j % numBoardRows) + numBoardRows) % numBoardRows
+    }
+  }
   // return target that is overlapped with, or null
   function checkOverlapWithTargets(nextSnakeHead, targets) {
     for (var t = 0; t < targets.length; t++) {
@@ -568,7 +578,8 @@ const modes = {
   EASY : "easy",
   MEDIUM : "medium",
   HARD : "hard",
-  ARCADE : "arcade"
+  ARCADE : "arcade",
+  ZEN : "zen"
 }
 
 const gameStates = {
